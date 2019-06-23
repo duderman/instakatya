@@ -1,0 +1,6 @@
+*.pyc
+*.tsv
+credentials.py
+*.checkpoint
+*.log
+*.txt
