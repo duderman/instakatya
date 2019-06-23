@@ -12,8 +12,6 @@ from datetime import datetime, timedelta
 
 import config
 
-MAX = 99999
-
 bot = Bot(
     max_follows_per_day=350,
     max_unfollows_per_day=350,
@@ -109,7 +107,10 @@ def run_threaded(job_fn):
     job_thread = threading.Thread(target=job_fn)
     job_thread.start()
 
+def stats():
+    bot.save_user_stats(bot.user_id)
 
+schedule.every(1).hour.do(run_threaded, stats)
 schedule.every(1).hour.do(run_threaded, process_followers)
 schedule.every(1).days.at("08:00").do(run_threaded, unfollow_old)
 
