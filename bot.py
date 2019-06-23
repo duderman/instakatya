@@ -30,33 +30,35 @@ bot = Bot(
     min_media_count_to_follow=10,
     like_delay=1,
     follow_delay=5,
-    unfollow_delay=5
+    unfollow_delay=5,
+    max_followers_to_following_ratio=config.MAX,
+    max_following_to_followers_ratio=config.MAX
 )
 bot.login(username = credentials.USERNAME, password = credentials.PASSWORD)
 
 def all_users():
-    bot.read_list_from_file(config.USERS_FILE)
+    return bot.read_list_from_file(config.USERS_FILE)
 
 def random_user():
-    random.choice(all_users())
+    return random.choice(all_users())
 
-def stats():
-    bot.save_user_stats(bot.user_id)
+def follow_and_like(user_id):
+    if not bot.follow(user_id):
+        return False
+    bot.like_user(user_id, amount = config.LIKES_COUNT, filtration = False)
 
-def follow():
-    bot.follow_followers(random_user(), nfollows = config.FOLLOW_COUNT)
+def random_followers():
+    user = random_user()
+    bot.logger.info("Getting random followers of {}".format(user))
+    return bot.get_user_followers(random_user(), config.FOLLOWERS_COUNT)
 
-def like():
-    bot.like_followers(random_user(), nlikes=config.LIKES_COUNT)
+def process_followers():
+    for follower in random_followers():
+        follow_and_like(follower)
 
-# def rotate_followed():
-
-# def unfollow_old():
-
-
-def run_threaded(job_fn):
-    job_thread = threading.Thread(target=job_fn)
-    job_thread.start()
+# def run_threaded(job_fn):
+#     job_thread = threading.Thread(target=job_fn)
+#     job_thread.start()
 
 
 # schedule.every(1).hour.do(run_threaded, stats)
@@ -69,6 +71,9 @@ def run_threaded(job_fn):
 #     schedule.run_pending()
 #     time.sleep(1)
 
-follow()
-like()
-stats()
+# process_followers()
+
+existing_followers = utils.file(config.EXISTING_FOLLOWERS_FILE)
+for user in all_users():
+    for follower in bot.get_user_followers(user, None):
+        existing_followers.append(follower)
