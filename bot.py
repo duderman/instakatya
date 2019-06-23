@@ -51,7 +51,7 @@ def random_user():
     return random.choice(all_users())
 
 def followed_file_name(date):
-    return file_path("followed_{}".format(date.strftime("%Y%m%d")))
+    return file_path("followed_{}.txt".format(date.strftime("%Y%m%d")))
 
 def today():
     return datetime.now()
