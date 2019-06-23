@@ -33,12 +33,16 @@ bot = Bot(
     follow_delay=5,
     unfollow_delay=5,
     max_followers_to_following_ratio=config.MAX,
-    max_following_to_followers_ratio=config.MAX
+    max_following_to_followers_ratio=config.MAX,
+    base_path=config.BASE_PATH
 )
 bot.login(username = credentials.USERNAME, password = credentials.PASSWORD)
 
+def file_path(filename):
+    return  os.path.join(config.BASE_PATH, filename)
+
 existing_followers = utils.file(config.EXISTING_FOLLOWERS_FILE)
-processed_existing_followers = utils.file(config.PROCESSED_EXISTING_FOLLOWERS_FILE)
+processed_existing_followers = utils.file(file_path(config.PROCESSED_EXISTING_FOLLOWERS_FILE))
 
 def all_users():
     return bot.read_list_from_file(config.USERS_FILE)
@@ -47,7 +51,7 @@ def random_user():
     return random.choice(all_users())
 
 def followed_file_name(date):
-    return "followed_{}".format(date.strftime("%Y%m%d"))
+    return file_path("followed_{}".format(date.strftime("%Y%m%d")))
 
 def today():
     return datetime.now()
@@ -95,25 +99,22 @@ def process_followers():
 
 def followed_3_days_ago():
     filename = followed_file_name(three_days_ago())
-    utils.file(filename).list
+    return utils.file(filename).list
 
 def unfollow_old():
     bot.unfollow_users(followed_3_days_ago())
 
+def run_threaded(job_fn):
+    job_thread = threading.Thread(target=job_fn)
+    job_thread.start()
 
-# def run_threaded(job_fn):
-#     job_thread = threading.Thread(target=job_fn)
-#     job_thread.start()
 
-
-# schedule.every(1).hour.do(run_threaded, stats)
-# schedule.every(1).hour.do(run_threaded, follow)
+# schedule.every(1).hour.do(run_threaded, process_followers)
 # schedule.every(1).hour.do(run_threaded, like)
-# schedule.every(1).days.at("07:00").do(run_threaded, rotate_followed)
 # schedule.every(1).days.at("08:00").do(run_threaded, unfollow_old)
 
 # while True:
 #     schedule.run_pending()
 #     time.sleep(1)
 
-process_followers()
+unfollow_old()
