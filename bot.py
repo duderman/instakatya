@@ -11,7 +11,6 @@ from instabot import Bot, utils
 from datetime import datetime, timedelta
 
 import config
-import credentials
 
 MAX = 99999
 
@@ -36,7 +35,9 @@ bot = Bot(
     max_following_to_followers_ratio=config.MAX,
     base_path=config.BASE_PATH
 )
-bot.login(username = credentials.USERNAME, password = credentials.PASSWORD)
+
+
+bot.login(username = config.USERNAME, password = os.environ["PASSWORD"])
 
 def file_path(filename):
     return  os.path.join(config.BASE_PATH, filename)
