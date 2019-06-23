@@ -109,12 +109,9 @@ def run_threaded(job_fn):
     job_thread.start()
 
 
-# schedule.every(1).hour.do(run_threaded, process_followers)
-# schedule.every(1).hour.do(run_threaded, like)
-# schedule.every(1).days.at("08:00").do(run_threaded, unfollow_old)
+schedule.every(1).hour.do(run_threaded, process_followers)
+schedule.every(1).days.at("08:00").do(run_threaded, unfollow_old)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-
-unfollow_old()
+while True:
+    schedule.run_pending()
+    time.sleep(1)
