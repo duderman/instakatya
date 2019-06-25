@@ -42,6 +42,7 @@ def file_path(filename):
 
 existing_followers = utils.file(config.EXISTING_FOLLOWERS_FILE)
 processed_existing_followers = utils.file(file_path(config.PROCESSED_EXISTING_FOLLOWERS_FILE))
+existing_followers_done = False
 
 def all_users():
     return bot.read_list_from_file(config.USERS_FILE)
@@ -75,15 +76,21 @@ def random_followers():
     return bot.get_user_followers(random_user(), config.FOLLOWERS_COUNT)
 
 def existing_followers_left():
-    return list(set(existing_followers.list) - set(processed_existing_followers.list))
+    if not existing_followers_done:
+        return list(set(existing_followers.list) - set(processed_existing_followers.list))
 
 def random_existing_follower():
-    return random.choice(existing_followers_left())
+    existing_followers = existing_followers_left()
+    if existing_followers:
+        return random.choice(existing_followers)
+    else:
+        existing_followers_done = True
 
 def next_existing_follower():
     follower = random_existing_follower()
-    processed_existing_followers.append(follower)
-    return follower
+    if follower:
+        processed_existing_followers.append(follower)
+        return follower
 
 def process_followers():
     total_processed = 0
@@ -93,8 +100,12 @@ def process_followers():
             total_processed += 1
 
     while total_processed < config.FOLLOWERS_COUNT:
-        if follow_and_like(next_existing_follower()):
-            total_processed += 1
+        next_follower = next_existing_follower()
+        if next_follower:
+            if follow_and_like(next_follower):
+                total_processed += 1
+        else:
+            total_processed = config.FOLLOWERS_COUNT
 
 def followed_3_days_ago():
     filename = followed_file_name(three_days_ago())
@@ -108,11 +119,14 @@ def run_threaded(job_fn):
     job_thread.start()
 
 def stats():
-    bot.save_user_stats(bot.user_id)
+    bot.save_user_stats(bot.user_id, path=config.BASE_PATH)
 
 schedule.every(1).hour.do(run_threaded, stats)
 schedule.every(1).hour.do(run_threaded, process_followers)
 schedule.every(1).days.at("08:00").do(run_threaded, unfollow_old)
+
+run_threaded(stats)
+run_threaded(process_followers)
 
 while True:
     schedule.run_pending()
