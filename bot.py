@@ -35,7 +35,7 @@ bot = Bot(
 )
 
 
-bot.login(username = config.USERNAME, password = os.environ["PASSWORD"])
+bot.login(username = os.environ["USERNAME"], password = os.environ["PASSWORD"])
 
 def file_path(filename):
     return  os.path.join(config.BASE_PATH, filename)
