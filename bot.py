@@ -31,7 +31,8 @@ bot = Bot(
     unfollow_delay=5,
     max_followers_to_following_ratio=config.MAX,
     max_following_to_followers_ratio=config.MAX,
-    base_path=config.BASE_PATH
+    base_path=config.BASE_PATH,
+    blocked_actions_protection=False
 )
 
 
