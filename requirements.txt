@@ -3,7 +3,7 @@ bumpversion==0.5.3
 instabot==0.51.0
 schedule==0.6.0
 tqdm==4.32.2
-requests==2.22.0
+requests==2.31.0
 pycodestyle==2.5.0
 requests-toolbelt==0.9.1
 pyflakes==2.1.1
